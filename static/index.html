@@ -1,0 +1,124 @@
+<!doctype html>
+<html>
+	<head>
+	    <meta charset="utf-8"/>
+	    <title>Documentor</title>
+
+		<style type="text/css">
+		    body{
+		        font-family: helvetica, Sans-serif;
+		        font-size: 13px;
+		    }
+		
+		    #log{
+		        width: 740px; 
+		        margin: 10px auto;
+		        padding: 10px;
+		        background: #DDD;
+		    }
+		    #box{
+                width: 740px; 
+                margin: 10px auto;
+                padding: 10px;
+            }
+		    .stdout{
+		        font-family: monospace;
+		        font-size: 12px;
+		        color: #666;
+		        width: 800px;
+		    }
+		    .stderr{
+		        font-family: monospace;
+		        font-size: 12px;
+		        color: red;
+		    }
+		    .cmd{
+		        font-family: monospace;
+		        font-size: 12px;
+		        color: green;
+		        font-weight: bold;
+		        margin: 10px 0;
+		    }
+		    .info{
+		        font-family: monospace;
+		        font-size: 12px;
+		        color: yellow;
+		        font-weight: bold;
+		        margin: 10px 0;
+		    }
+		    .error{
+		        font-family: monospace;
+		        font-size: 12px;
+		        color: red;
+		        font-weight: bold;
+		        margin: 10px 0;
+		    }
+		</style>
+	
+	    <script src="/socket.io/socket.io.js"></script>
+	    <script>
+	        var outputHTML = "";
+	    
+	        var socket = io.connect();
+	            socket.on('log', function (data) {
+	            if(data && data.html){
+	                outputHTML += data.html;
+	                document.getElementById("log").innerHTML = outputHTML;
+	            }
+	            // socket.emit('my other event', { my: 'data' });
+	        });
+	        
+	        function startDocumentor(){
+	            var repo = document.getElementById("repo").value,
+	                engine = document.getElementById("engine").value,
+                    source = document.getElementById("source").value;
+	            
+	            outputHTML = "<div class=\"documentor info\">Processing queued, might take time if there's already a work in progress...</div>";
+	            document.getElementById("log").innerHTML = outputHTML;
+	            
+	            socket.emit('documentor', { repo: repo, engine:  engine, source: source});
+	            
+	            return false;
+	        }
+	        
+	    </script>
+	</head>
+	<body>
+	
+	   <div id="box">
+	       <form method="post" onsubmit="return startDocumentor()">
+
+                <h2>Generate documenation from source</h2>
+    	           
+	           <table>
+	               <tr>
+	                   <td>Repo URL (Git / SVN / ZIP / TAR.GZ):</td>
+	                   <td><input type="text" name="repo" id="repo" style="width:400px" placeholder="git://github.com/andris9/mailcomposer.git" value="git://github.com/andris9/mailcomposer.git"/></td>
+	               </tr>
+	               <tr>
+                       <td>Source directory:</td>
+                       <td><input type="text" name="source" id="source" style="width:200px" placeholder="/lib/" value="/lib/"/></td>
+                   </tr>
+	               <tr>
+	                   <td>Documentation engine:</td>
+	                   <td>
+				           <select name="engine" id="engine">
+				               <option value="jsdoc-toolkit">jsdoc-toolkit</option>
+				               <option value="pdoc">pdoc</option>
+				               <option value="jsduck">jsduck</option>
+				               <option value="phpDocumentor">phpDocumentor</option>
+				           </select>
+	                   </td>
+	               </tr>
+	               <tr>
+	                   <td colspan="2"><input type="submit" name="nupp" value="Generate docs" /></td>
+	               </tr>
+	           </table>
+	           
+	       </form>
+	   </div>
+	   
+	   <div id="log"></div>
+	
+	</body>
+</html>
