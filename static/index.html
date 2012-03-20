@@ -14,38 +14,43 @@
 		        width: 740px; 
 		        margin: 10px auto;
 		        padding: 10px;
-		        background: #DDD;
+		        background: #2D5F32;
 		    }
 		    #box{
-                width: 740px; 
+                width: 740px;
                 margin: 10px auto;
                 padding: 10px;
             }
 		    .stdout{
 		        font-family: monospace;
 		        font-size: 12px;
-		        color: #666;
+		        color: #FFE89D;
 		        width: 800px;
 		    }
 		    .stderr{
 		        font-family: monospace;
 		        font-size: 12px;
-		        color: red;
+		        color: #993D25;
 		    }
 		    .cmd{
 		        font-family: monospace;
 		        font-size: 12px;
-		        color: green;
+		        color: #E5D835;
 		        font-weight: bold;
 		        margin: 10px 0;
 		    }
 		    .info{
 		        font-family: monospace;
 		        font-size: 12px;
-		        color: yellow;
+		        color: #F39F41;
 		        font-weight: bold;
 		        margin: 10px 0;
 		    }
+            
+            .documentor a{
+                color: #E0E0E0;
+            }
+            
 		    .error{
 		        font-family: monospace;
 		        font-size: 12px;
@@ -76,7 +81,13 @@
 	            outputHTML = "<div class=\"documentor info\">Processing queued, might take time if there's already a work in progress...</div>";
 	            document.getElementById("log").innerHTML = outputHTML;
 	            
-	            socket.emit('documentor', { repo: repo, engine:  engine, source: source});
+	            try{
+	               var params = JSON.parse(document.getElementById("params").value);
+                }catch(E){
+                    params = {};
+                }
+	            
+	            socket.emit('documentor', { repo: repo, engine:  engine, source: source, params: params});
 	            
 	            return false;
 	        }
@@ -88,30 +99,42 @@
 	   <div id="box">
 	       <form method="post" onsubmit="return startDocumentor()">
 
-                <h2>Generate documenation from source</h2>
+                <h2>Generate documentation from source</h2>
     	           
 	           <table>
 	               <tr>
-	                   <td>Repo URL (Git / SVN / ZIP / TAR.GZ):</td>
-	                   <td><input type="text" name="repo" id="repo" style="width:400px" placeholder="git://github.com/andris9/mailcomposer.git" value="git://github.com/andris9/mailcomposer.git"/></td>
+	                   <td valign="top">Repo URL (Git / SVN / ZIP / TAR.GZ):</td>
+	                   <td><input type="text" name="repo" id="repo" style="width:400px" placeholder="git://github.com/andris9/mailcomposer.git" value="git://github.com/andris9/mailcomposer.git"/><br/>
+	                   <small>Repo type is derived from the URL, if ends with ".git", it is a GIT repo, etc.</small></td>
 	               </tr>
 	               <tr>
-                       <td>Source directory:</td>
-                       <td><input type="text" name="source" id="source" style="width:200px" placeholder="/lib/" value="/lib/"/></td>
+                       <td valign="top">Source directory:</td>
+                       <td><input type="text" name="source" id="source" style="width:200px" placeholder="/lib/" value="/lib/"/><br/>
+                        <small>Enter the directory for parsing where the source files are, "/" is source root</small></td>
                    </tr>
 	               <tr>
-	                   <td>Documentation engine:</td>
+	                   <td valign="top">Documentation engine:</td>
 	                   <td>
 				           <select name="engine" id="engine">
 				               <option value="jsdoc-toolkit">jsdoc-toolkit</option>
 				               <option value="pdoc">pdoc</option>
 				               <option value="jsduck">jsduck</option>
 				               <option value="phpDocumentor">phpDocumentor</option>
-				           </select>
+				           </select><br/>
+				           <small>Should be self-explanatory</small>
 	                   </td>
 	               </tr>
 	               <tr>
+	                   <td valign="top">Optional params (JSON)</td>
+	                   <td><textarea id="params" name="params" style="width: 400px; height: 140px; padding: 3px;">{
+    "--recurse": "5",
+    "--warnings": ["-link", "-no_doc"]
+}</textarea><br />
+                       <small>Define command line params with {"--key":"value"}, if value is an array, it is repeated with the key.<br/><strong>NB!</strong> not all params are allowed</small></td>
+	               </tr>
+	               <tr>
 	                   <td colspan="2"><input type="submit" name="nupp" value="Generate docs" /></td>
+	                   
 	               </tr>
 	           </table>
 	           
